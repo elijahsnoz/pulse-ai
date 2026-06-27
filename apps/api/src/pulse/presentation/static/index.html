@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pulse — AI Second Screen</title>
+<style>
+  :root{
+    --bg:#0a0e1a; --panel:#121829; --panel2:#1a2238; --txt:#e8edf7;
+    --muted:#8b95ad; --home:#52b1ff; --away:#ff5d73;
+    --accent:#ff3b6b; --good:#33d98b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(1200px 800px at 50% -10%,#16203a,#0a0e1a 60%);color:var(--txt);
+    min-height:100vh;padding:24px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .brand{font-weight:800;letter-spacing:.5px;font-size:18px}
+  .brand span{color:var(--accent)}
+  .status{font-size:12px;color:var(--muted)}
+  .score{display:flex;align-items:center;justify-content:center;gap:28px;margin:10px 0 18px}
+  .team{font-size:22px;font-weight:700;min-width:160px}
+  .team.home{text-align:right;color:var(--home)}
+  .team.away{text-align:left;color:var(--away)}
+  .nums{font-size:54px;font-weight:800;letter-spacing:2px}
+  .minute{font-size:13px;color:var(--muted);text-align:center;margin-top:-10px}
+  .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid #1f2942;
+    border-radius:16px;padding:18px 20px}
+  .card h3{margin:0 0 14px;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
+  .heartwrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .heart{font-size:84px;line-height:1;filter:drop-shadow(0 0 18px rgba(255,59,107,.5));
+    animation:beat 1s infinite ease-in-out}
+  @keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}}
+  .bpm{font-size:30px;font-weight:800}
+  .bpm small{font-size:13px;color:var(--muted);font-weight:500}
+  .vibe{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+  .chip{background:#0e1526;border:1px solid #283450;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600}
+  .chip.em{color:var(--accent)}
+  .stars{font-size:20px;letter-spacing:3px;color:#ffd166}
+  .bar{margin:12px 0}
+  .bar .lab{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px}
+  .track{height:10px;background:#0d1424;border-radius:8px;overflow:hidden}
+  .fill{height:100%;border-radius:8px;transition:width .4s ease}
+  .mom{height:12px;background:#0d1424;border-radius:8px;position:relative;overflow:hidden}
+  .mom .mid{position:absolute;left:50%;top:0;bottom:0;width:2px;background:#33405e}
+  .mom .seg{position:absolute;top:0;bottom:0;transition:all .4s ease}
+  .timeline{grid-column:1/-1}
+  .feed{display:flex;flex-direction:column;gap:8px;max-height:280px;overflow:auto}
+  .ev{display:flex;align-items:center;gap:12px;background:#0e1526;border:1px solid #222d49;
+    border-radius:12px;padding:9px 14px;animation:slide .35s ease}
+  @keyframes slide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+  .ev .ic{font-size:20px}
+  .ev .mn{color:var(--muted);font-size:12px;min-width:38px}
+  .ev.goal{border-color:#2e7d52;background:#0f2419}
+  .ev.card{border-color:#7d2e3a}
+  .ev .tx{font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">PULSE<span>.</span> <small style="color:var(--muted);font-weight:500">AI Second Screen</small></div>
+    <div class="status" id="status">connecting…</div>
+  </div>
+
+  <div class="score">
+    <div class="team home" id="homeName">Home</div>
+    <div style="text-align:center">
+      <div class="nums"><span id="homeScore">0</span> : <span id="awayScore">0</span></div>
+      <div class="minute" id="minute">0'</div>
+    </div>
+    <div class="team away" id="awayName">Away</div>
+  </div>
+
+  <div class="grid">
+    <div class="card heartwrap">
+      <h3>Match Pulse</h3>
+      <div class="heart" id="heart">❤️</div>
+      <div class="bpm"><span id="bpm">–</span> <small>BPM</small></div>
+      <div class="vibe">
+        <span class="chip em" id="emotion">—</span>
+        <span class="chip" id="phase">—</span>
+        <span class="chip" id="pulseBand">—</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Match Intelligence</h3>
+      <div class="bar">
+        <div class="lab"><span>Drama</span><span class="stars" id="stars">☆☆☆☆☆</span></div>
+        <div class="track"><div class="fill" id="dramaFill" style="width:0%;background:linear-gradient(90deg,#ff9f1c,#ff3b6b)"></div></div>
+      </div>
+      <div class="bar">
+        <div class="lab"><span>Pulse</span><span id="pulseVal">0</span></div>
+        <div class="track"><div class="fill" id="pulseFill" style="width:0%;background:linear-gradient(90deg,#33d98b,#ffd166)"></div></div>
+      </div>
+      <div class="bar">
+        <div class="lab"><span id="momLabel">Momentum</span><span id="momBand">—</span></div>
+        <div class="mom"><div class="mid"></div><div class="seg" id="momSeg"></div></div>
+      </div>
+      <div class="bar">
+        <div class="lab"><span>Pressure</span><span><span id="presH" style="color:var(--home)">0</span> / <span id="presA" style="color:var(--away)">0</span></span></div>
+        <div class="track" style="display:flex;gap:3px">
+          <div class="fill" id="presHFill" style="width:0%;background:var(--home)"></div>
+          <div class="fill" id="presAFill" style="width:0%;background:var(--away)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card timeline">
+      <h3>Live Timeline</h3>
+      <div class="feed" id="feed"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let HOME = "Home", AWAY = "Away";
+
+const proto = location.protocol === "https:" ? "wss" : "ws";
+const ws = new WebSocket(`${proto}://${location.host}/ws/match/demo`);
+
+ws.onopen = () => $("status").textContent = "● live";
+ws.onclose = () => $("status").textContent = "○ ended";
+ws.onerror = () => $("status").textContent = "connection error";
+
+ws.onmessage = (e) => {
+  const m = JSON.parse(e.data);
+  if (m.type === "meta") return onMeta(m);
+  if (m.type === "snapshot") return onSnapshot(m);
+  if (m.type === "timeline") return onTimeline(m);
+};
+
+function onMeta(m){
+  HOME = m.home; AWAY = m.away;
+  $("homeName").textContent = m.home;
+  $("awayName").textContent = m.away;
+}
+
+function onSnapshot(s){
+  $("homeScore").textContent = s.score.home;
+  $("awayScore").textContent = s.score.away;
+  $("minute").textContent = Math.floor(s.minute) + "'";
+  // heartbeat
+  $("bpm").textContent = s.pulse.bpm;
+  const beat = 60 / Math.max(s.pulse.bpm, 1);
+  $("heart").style.animationDuration = beat + "s";
+  $("pulseBand").textContent = s.pulse.band;
+  $("emotion").textContent = s.emotion;
+  $("phase").textContent = s.phase;
+  // bars
+  $("stars").textContent = "★".repeat(s.drama.stars) + "☆".repeat(5 - s.drama.stars);
+  $("dramaFill").style.width = s.drama.value + "%";
+  $("pulseVal").textContent = s.pulse.value;
+  $("pulseFill").style.width = s.pulse.value + "%";
+  // momentum (-100..100) centered
+  $("momLabel").textContent = "Momentum";
+  $("momBand").textContent = s.momentum.band;
+  const seg = $("momSeg");
+  const v = s.momentum.value;
+  const half = Math.min(Math.abs(v), 100) / 2;
+  if (v >= 0){ seg.style.left = "50%"; seg.style.width = half + "%"; seg.style.background = "var(--home)"; }
+  else { seg.style.right = ""; seg.style.left = (50 - half) + "%"; seg.style.width = half + "%"; seg.style.background = "var(--away)"; }
+  // pressure
+  $("presH").textContent = s.pressure.home;
+  $("presA").textContent = s.pressure.away;
+  $("presHFill").style.width = (s.pressure.home/2) + "%";
+  $("presAFill").style.width = (s.pressure.away/2) + "%";
+}
+
+function onTimeline(t){
+  const feed = $("feed");
+  const div = document.createElement("div");
+  let cls = "ev";
+  if (t.kind === "goal") cls += " goal";
+  if (t.kind === "card") cls += " card";
+  div.className = cls;
+  div.innerHTML = `<span class="mn">${Math.floor(t.minute)}'</span><span class="ic">${t.icon}</span><span class="tx">${t.text}</span>`;
+  feed.prepend(div);
+}
+</script>
+</body>
+</html>

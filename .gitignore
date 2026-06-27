@@ -16,6 +16,9 @@ node_modules/
 out/
 dist/
 
+# Generated demo tapes
+var/
+
 # Env & secrets
 .env
 .env.local

@@ -4,10 +4,15 @@ version = "0.1.0"
 description = "Pulse — deterministic football match-intelligence domain & metric engine"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []  # the domain layer is pure stdlib by design
+dependencies = []  # the domain + application layers are pure stdlib by design
 
 [project.optional-dependencies]
-test = ["pytest>=8.0", "pytest-cov>=5.0"]
+# Presentation layer only — domain/application stay dependency-free.
+api = ["fastapi>=0.110", "uvicorn[standard]>=0.29"]
+test = ["pytest>=8.0", "pytest-cov>=5.0", "fastapi>=0.110", "httpx>=0.27"]
+
+[project.scripts]
+pulse-api = "pulse.presentation.app:main"
 
 [build-system]
 requires = ["hatchling"]
