@@ -13,7 +13,10 @@ import { bandTheme } from "@/lib/colors";
 import { useMatchStore } from "@/stores/matchStore";
 
 export function AmbientField() {
-  const band = useMatchStore((s) => s.snapshot?.drama.band ?? "Dormant");
+  const dramaBand = useMatchStore((s) => s.snapshot?.drama.band ?? "Dormant");
+  const ended = useMatchStore((s) => s.status === "ended");
+  // At full time the room cools — the match has released its tension.
+  const band = ended ? "Dormant" : dramaBand;
   const glow = bandTheme(band).glow;
 
   return (

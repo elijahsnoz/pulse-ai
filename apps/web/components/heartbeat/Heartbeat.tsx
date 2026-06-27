@@ -15,14 +15,18 @@ import { useMatchStore } from "@/stores/matchStore";
 
 export function Heartbeat() {
   const reduce = useReducedMotion();
-  const bpm = useMatchStore((s) => s.snapshot?.pulse.bpm ?? 64);
-  const band = useMatchStore((s) => s.snapshot?.pulse.band ?? "Dormant");
+  const rawBpm = useMatchStore((s) => s.snapshot?.pulse.bpm ?? 64);
+  const rawBand = useMatchStore((s) => s.snapshot?.pulse.band ?? "Dormant");
   const dramaBand = useMatchStore((s) => s.snapshot?.drama.band ?? "Dormant");
   const spiking = useMatchStore((s) => s.goalFlash !== null);
+  const ended = useMatchStore((s) => s.status === "ended");
 
+  // At full time the tension releases — the heart eases to a calm resting beat.
+  const bpm = ended ? 56 : rawBpm;
+  const band = ended ? "Dormant" : rawBand;
   const theme = bandTheme(band);
   const beat = Math.min(1.15, Math.max(0.36, 60 / Math.max(bpm, 1)));
-  const drama = bandIntensity(dramaBand);
+  const drama = ended ? 0 : bandIntensity(dramaBand);
   const scale = (1 + drama * 0.3) * (spiking ? 1.28 : 1);
   const glowSize = 220 + drama * 80;
 
