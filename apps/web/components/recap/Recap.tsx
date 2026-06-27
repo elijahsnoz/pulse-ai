@@ -39,6 +39,11 @@ function turningPoint(timeline: TimelineEntry[]): TimelineEntry | null {
   return goal ?? null;
 }
 
+function mostEmotionalMinute(samples: Sample[]): { minute: number; stars: number } | null {
+  if (!samples.length) return null;
+  return samples.reduce((best, s) => (s.stars >= best.stars ? s : best), samples[0]);
+}
+
 const Row = ({
   delay,
   label,
@@ -143,10 +148,18 @@ export function Recap({ onReplay }: { onReplay: () => void }) {
                 return tp ? `${Math.floor(tp.minute)}' — ${tp.text}` : "A slow, even battle";
               })()}
             </Row>
-            <Row delay={0.55} label="Peak heart rate">
+            <Row delay={0.55} label="Most emotional moment">
+              {(() => {
+                const m = mostEmotionalMinute(samples);
+                return m
+                  ? `${Math.floor(m.minute)}' — ${"★".repeat(m.stars)}${"☆".repeat(5 - m.stars)}`
+                  : "A slow burn throughout";
+              })()}
+            </Row>
+            <Row delay={0.65} label="Peak heart rate">
               {Math.round(peakBpm)} bpm at {Math.floor(peakBpmMinute)}&rsquo;
             </Row>
-            <Row delay={0.65} label="Pulse reflection">
+            <Row delay={0.75} label="Pulse reflection">
               <span className="font-medium italic text-white/85">
                 {matchReflection(snapshot.score)}
               </span>
@@ -155,7 +168,7 @@ export function Recap({ onReplay }: { onReplay: () => void }) {
             <motion.button
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.85 }}
+              transition={{ delay: 0.95 }}
               onClick={onReplay}
               className="mt-6 w-full rounded-xl bg-ember py-3 font-semibold text-white transition hover:brightness-110"
             >

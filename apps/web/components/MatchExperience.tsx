@@ -7,10 +7,15 @@
  * the priority order of the design: heartbeat & story at the heart, score above,
  * supporting visuals around, timeline alongside, recap at the end.
  */
+import { AnimatePresence } from "framer-motion";
+import { useState } from "react";
+
 import { ErrorState, LoadingState } from "@/components/ConnectionState";
 import { DramaStars } from "@/components/drama/DramaStars";
+import { AmbientField } from "@/components/effects/AmbientField";
 import { GoalFlash } from "@/components/effects/GoalFlash";
 import { Heartbeat } from "@/components/heartbeat/Heartbeat";
+import { Intro } from "@/components/intro/Intro";
 import { TugOfWar } from "@/components/momentum/TugOfWar";
 import { Recap } from "@/components/recap/Recap";
 import { ScoreBoard } from "@/components/score/ScoreBoard";
@@ -39,14 +44,19 @@ export function MatchExperience() {
   const { replay } = useMatchStream();
   const status = useMatchStore((s) => s.status);
   const hasSnapshot = useMatchStore((s) => s.snapshot !== null);
+  const [introDone, setIntroDone] = useState(false);
 
   const showLoading = !hasSnapshot && (status === "connecting" || status === "idle");
   const showError = status === "error" && !hasSnapshot;
 
   return (
     <main className="relative mx-auto min-h-screen w-full max-w-6xl px-4 pb-16 pt-6 sm:px-6">
+      <AmbientField />
       <GoalFlash />
       <Recap onReplay={replay} />
+      <AnimatePresence>
+        {!introDone && <Intro onDone={() => setIntroDone(true)} />}
+      </AnimatePresence>
 
       <header className="mb-6 flex items-center justify-between">
         <div className="text-lg font-extrabold tracking-tight text-white">
@@ -65,10 +75,10 @@ export function MatchExperience() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1.45fr_1fr]">
           {/* Hero column */}
-          <section className="flex flex-col items-center gap-8">
+          <section className="flex flex-col items-center gap-10">
             <ScoreBoard />
 
-            <div className="flex min-h-[210px] w-full items-center justify-center pt-2">
+            <div className="flex min-h-[250px] w-full items-center justify-center pt-4">
               <Heartbeat />
             </div>
 

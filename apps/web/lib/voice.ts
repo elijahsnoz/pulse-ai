@@ -151,7 +151,7 @@ export function createNarrator(): Narrator {
         ctx.lastDir = snap.momentum.direction;
         ctx.lastEmotion = snap.emotion;
         markSpoken(snap.minute);
-        return line("Here we go. Let's feel this one out.", "calm");
+        return line("Kickoff. Settle in — let's feel this one together.", "calm");
       }
 
       const dir = snap.momentum.direction;
@@ -183,9 +183,9 @@ export function createNarrator(): Narrator {
       return line(
         pick(
           [
-            "End to end now — anything could happen.",
-            "The tempo's climbing.",
-            "You can feel this one tightening.",
+            "End to end now — nobody's blinking.",
+            "Feel that? The tempo's lifting.",
+            "This one's starting to crackle.",
           ],
           seed,
         ),
@@ -206,8 +206,9 @@ export function createNarrator(): Narrator {
         return line(
           pick(
             [
-              `In the ${Math.floor(minute)}th. That could be the moment of the match.`,
+              `In the ${Math.floor(minute)}th. That could be the moment of the night.`,
               "So late. That might just be the winner.",
+              "Oh, the timing. That one will hurt.",
             ],
             seed,
           ),
@@ -219,7 +220,7 @@ export function createNarrator(): Narrator {
           [
             "That's the pressure finally paying off.",
             `${team} have their goal — and they earned it.`,
-            "Out of a tense spell, a moment of quality.",
+            "Out of a tense spell, a flash of quality.",
           ],
           seed,
         ),

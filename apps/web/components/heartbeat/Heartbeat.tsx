@@ -1,78 +1,73 @@
 "use client";
 
 /**
- * The Heartbeat — Pulse's identity.
+ * The Heartbeat — Pulse's logo.
  *
- * An organic, living heart whose tempo follows the match BPM, whose size swells
- * in drama, and whose colour is the heat of the moment. Users should remember
- * this more than any chart.
+ * A living heart: organic lub-dub, a slow breath, a glow that deepens with
+ * drama, and a hard spike the instant a goal lands. The one thing judges
+ * remember.
  */
 import { motion, useReducedMotion } from "framer-motion";
 
 import { bandIntensity, bandTheme } from "@/lib/colors";
+import { BEAT_KEYFRAMES, BEAT_TIMES, HEART_PATH } from "@/lib/heart";
 import { useMatchStore } from "@/stores/matchStore";
-
-const HEART_PATH =
-  "M50 88 C 18 64, 4 44, 4 28 C 4 14, 15 6, 27 6 C 37 6, 45 12, 50 22 C 55 12, 63 6, 73 6 C 85 6, 96 14, 96 28 C 96 44, 82 64, 50 88 Z";
 
 export function Heartbeat() {
   const reduce = useReducedMotion();
   const bpm = useMatchStore((s) => s.snapshot?.pulse.bpm ?? 64);
   const band = useMatchStore((s) => s.snapshot?.pulse.band ?? "Dormant");
   const dramaBand = useMatchStore((s) => s.snapshot?.drama.band ?? "Dormant");
+  const spiking = useMatchStore((s) => s.goalFlash !== null);
 
   const theme = bandTheme(band);
   const beat = Math.min(1.15, Math.max(0.36, 60 / Math.max(bpm, 1)));
-  const scale = 1 + bandIntensity(dramaBand) * 0.32;
-
-  const beatKeyframes = reduce ? undefined : { scale: [1, 1.14, 1, 1.05, 1] };
+  const drama = bandIntensity(dramaBand);
+  const scale = (1 + drama * 0.3) * (spiking ? 1.28 : 1);
+  const glowSize = 220 + drama * 80;
 
   return (
     <div className="relative flex items-center justify-center" aria-hidden>
-      {/* soft ambient glow */}
+      {/* breath — a slow outer swell independent of the beat */}
       <motion.div
         className="absolute rounded-full blur-3xl"
-        style={{ width: 240, height: 240, background: theme.glow }}
-        animate={reduce ? undefined : { opacity: [0.5, 0.85, 0.5] }}
-        transition={{ duration: beat, repeat: Infinity, ease: "easeInOut" }}
+        style={{ width: glowSize, height: glowSize, background: theme.glow }}
+        animate={reduce ? undefined : { opacity: [0.45, 0.8, 0.45], scale: [1, 1.08, 1] }}
+        transition={{ duration: spiking ? beat : 5, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* expanding pulse ring on each beat */}
-      {!reduce && (
-        <motion.div
-          className="absolute rounded-full"
-          style={{ width: 150, height: 150, border: `2px solid ${theme.color}` }}
-          animate={{ scale: [0.8, 2], opacity: [0.55, 0] }}
-          transition={{ duration: beat, repeat: Infinity, ease: "easeOut" }}
-        />
-      )}
+      {/* two staggered pulse rings for a richer beat */}
+      {!reduce &&
+        [0, beat * 0.4].map((delay, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full"
+            style={{ width: 150, height: 150, border: `2px solid ${theme.color}` }}
+            animate={{ scale: [0.8, 2.1], opacity: [0.5, 0] }}
+            transition={{ duration: beat, repeat: Infinity, ease: "easeOut", delay }}
+          />
+        ))}
 
-      {/* the heart */}
       <motion.div
-        style={{ scale }}
-        transition={{ type: "spring", stiffness: 60, damping: 16 }}
+        animate={{ scale }}
+        transition={{ type: "spring", stiffness: 140, damping: 14 }}
       >
         <motion.svg
-          width={170}
-          height={170}
+          width={172}
+          height={172}
           viewBox="0 0 100 100"
-          animate={beatKeyframes}
+          animate={reduce ? undefined : BEAT_KEYFRAMES}
           transition={
             reduce
               ? undefined
-              : {
-                  duration: beat,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  times: [0, 0.14, 0.3, 0.44, 1],
-                }
+              : { duration: beat, repeat: Infinity, ease: "easeInOut", times: BEAT_TIMES }
           }
-          style={{ filter: `drop-shadow(0 0 26px ${theme.glow})` }}
+          style={{ filter: `drop-shadow(0 0 ${spiking ? 48 : 28}px ${theme.glow})` }}
         >
           <defs>
-            <radialGradient id="heartFill" cx="50%" cy="35%" r="75%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.35" />
-              <stop offset="35%" stopColor={theme.color} />
+            <radialGradient id="heartFill" cx="50%" cy="34%" r="78%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.4" />
+              <stop offset="38%" stopColor={theme.color} />
               <stop offset="100%" stopColor={theme.color} />
             </radialGradient>
           </defs>
@@ -80,10 +75,16 @@ export function Heartbeat() {
         </motion.svg>
       </motion.div>
 
-      {/* subtle BPM flavour — the pulse, not a metric */}
-      <div className="absolute -bottom-9 flex items-baseline gap-1 text-white/70">
-        <span className="text-2xl font-bold tabular-nums">{Math.round(bpm)}</span>
-        <span className="text-[11px] uppercase tracking-widest text-white/40">bpm</span>
+      <div className="absolute -bottom-10 flex items-baseline gap-1.5 text-white/70">
+        <motion.span
+          key={Math.round(bpm)}
+          initial={{ opacity: 0.4, y: 2 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-2xl font-bold tabular-nums tracking-tight"
+        >
+          {Math.round(bpm)}
+        </motion.span>
+        <span className="text-[11px] uppercase tracking-[0.3em] text-white/35">bpm</span>
       </div>
     </div>
   );
